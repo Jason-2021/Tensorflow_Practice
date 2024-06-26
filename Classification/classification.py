@@ -68,8 +68,8 @@ def train(train_dir, valid_dit, args):
 
 
 if __name__ == '__main__':
-    train_dir = '/data/jason/hw1_data/p1_data/train_50'
-    valid_dir = '/data/jason/hw1_data/p1_data/val_50'
+    train_dir = '/data4/jason/hw1_data/p1_data/train_50'
+    valid_dir = '/data4/jason/hw1_data/p1_data/val_50'
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--epochs',

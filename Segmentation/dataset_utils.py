@@ -28,12 +28,14 @@ def get_sat(dir_path, batchsize=16):
 
 
 def get_label(dir_path, batchsize=16):
+    # label = tf.Variable(tf.zeros((512, 512), dtype=tf.int32))
     def load_image(filepath):
         mask = tf.io.read_file(filepath)  # type
         mask = tf.image.decode_jpeg(mask, channels=3)
 
         with tf.init_scope():
             label = tf.Variable(tf.zeros((512, 512), dtype=tf.int32))
+        # label = tf.Variable(tf.zeros_like(label, dtype=tf.int32))
         
         mask = tf.cast((mask > 128), dtype=tf.int32)
         mask = 4 * mask[:, :, 0] + 2 * mask[:, :, 1] + 1 * mask[:, :, 2]
@@ -53,7 +55,7 @@ def get_label(dir_path, batchsize=16):
     #     image = tf.py_function(func=load_image, inp=[filepath], Tout=tf.float32)
     #     return image
 
-    label_paths = [x for x in os.listdir(dir_path)]
+    label_paths = [x for x in os.listdir(dir_path) if x.endswith('.png')]
     label_paths.sort()
     label_paths = [os.path.join(dir_path, x) for x in label_paths]
 
@@ -67,11 +69,11 @@ def get_dataset(dir_path, batchsize=16, train=True):
     def augment(image, label):
         if tf.random.uniform(()) > 0.5:
             image = tf.image.flip_left_right(image)
-            label = tf.image.flip_left_right(label)
+            label = tf.reverse(label, axis=[1])
         
         if tf.random.uniform(()) > 0.5:
             image = tf.image.flip_up_down(image)
-            label = tf.image.flip_up_down(label)
+            label = tf.reverse(label, axis=[0])
         
         return (image, label)
     
@@ -81,10 +83,11 @@ def get_dataset(dir_path, batchsize=16, train=True):
     dataset = tf.data.Dataset.zip((sat, label))
     
     if train:
-        #dataset = dataset.map(augment, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        dataset = dataset.map(augment, num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
-        dataset = dataset.shuffle(buffer_size=len(dataset), reshuffle_each_iteration=False)
+    dataset = dataset.shuffle(buffer_size=len(dataset), reshuffle_each_iteration=False)
     
-    dataset = dataset.batch(batchsize)
+    dataset = dataset.batch(batchsize, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+    dataset = dataset.prefetch(buffer_size=tf.data.AUTOTUNE)
 
     return dataset
