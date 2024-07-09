@@ -1,7 +1,7 @@
 import tensorflow as tf
 from tensorflow import keras
 from keras.layers import Conv2D, Conv2DTranspose, MaxPool2D, Dense, BatchNormalization, Dropout
-import tensorflow_hub as hub
+
 
 class UNet(keras.Model):
     def __init__(self):

@@ -6,8 +6,10 @@ import os
 from tqdm.auto import tqdm
 import numpy as np
 # from mean_iou_tool import mean_iou_score
-import tensorflow_hub as hub
+
 from unet import Unet
+
+from attn_UNet import attn_UNet
 
 
 def save_model(model, optimizer, epoch, exp_name, dir='checkpoint'):
@@ -116,7 +118,8 @@ def train(args, train_dir, valid_dir):
     valid_dataset = get_dataset(dir_path=valid_dir, batchsize=args.batch_size, train=False)
 
     # model
-    model = UNet()
+    # model = UNet()
+    model = attn_UNet((512, 512), 7, 0.3)
     #model = Unet(input_size=(512, 512, 3), classes=7)
     #model = Unet(input_size=(512, 512, 3), classes=7)
     # loss function
@@ -189,8 +192,8 @@ if __name__ == '__main__':
                         action='store_true')
     args = parser.parse_args()
     
-    train_dir = '/data4/jason/hw1_data/p3_data/train/'
-    valid_dir = '/data4/jason/hw1_data/p3_data/validation/'
+    train_dir = '/data/jason/hw1_data/p3_data/train/'
+    valid_dir = '/data/jason/hw1_data/p3_data/validation/'
     valid_out_dir = './'
 
     train(args, train_dir, valid_dir)
